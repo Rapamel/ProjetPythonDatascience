@@ -6,6 +6,10 @@ from dotenv import load_dotenv
 from functools import partial
 import shutil
 import tarfile
+import argparse
+
+
+
 
 def load_credentials():
     load_dotenv()
@@ -18,7 +22,7 @@ def load_credentials():
 
 
 def download_targz(years):
-    if isinstance(years, str):
+    if not isinstance(years,list):
         years=[years]
     os.makedirs("ArticlesTarGz", exist_ok=True)
     headers=load_credentials()
@@ -36,7 +40,7 @@ def download_targz(years):
 
 
 def extract_targz(years):
-    if isinstance(years, str):
+    if not isinstance(years,list):
         years=[years]
     for i in years:
         print(i, end=" ")
@@ -47,7 +51,7 @@ def extract_targz(years):
             print(f"Error extracting {i} The file is not found")
 
 def fold_left_local(fonction, acc, years):
-    if isinstance(years, str):
+    if not isinstance(years,list):
         years=[years]
     for i in years:
         print(i, end=" ")
@@ -60,7 +64,7 @@ def fold_left_local(fonction, acc, years):
 
 
 def map_local(fonction,years):
-    if isinstance(years, str):
+    if not isinstance(years,list):
         years=[years]
     acc=[]
     for i in years:
@@ -101,7 +105,7 @@ def slice_list(l,step):
     return [l[i:i+step] for i in range(0,len(l),step)]
 
 def delete_files(years):
-    if isinstance(years, str):
+    if not isinstance(years,list):
         years=[years]
     for i in years:
         try:
@@ -111,10 +115,11 @@ def delete_files(years):
             print(f"Error deleting {i} The file is not found")
 
 def get_freq_and_articles_global(isInflation,years,step):
-    if isinstance(years, str):
+    if not isinstance(years,list):
         years=[years]
     chunks=slice_list(years,step)
     frequences=pd.DataFrame()
+    os.makedirs("ArticlesInflation", exist_ok=True)
     for i in chunks:
         download_targz(i)
         extract_targz(i)
@@ -128,9 +133,24 @@ def get_freq_and_articles_global(isInflation,years,step):
             for k in c:
                 df.append((a,b,k))
         df=pd.DataFrame(df,columns=["Title","Date","Article"])
-        df.to_parquet(f"ArticlesParquet/{i[0]}-{i[-1]}.parquet")
+        df.to_parquet(f"ArticlesInflation/{i[0]}-{i[-1]}.parquet")
     return frequences
 
 def isInflation(article):
-    return article.lower().find("inflation")!=-1
-get_freq_and_articles_global(isInflation,[i for i in range(1918,1963)],3)
+    return "inflation" in article.lower()
+
+
+if __name__ == "__main__":
+    # Create the argument parser
+    parser = argparse.ArgumentParser(description="Fetch news articles for a given year range.")
+
+    # Add arguments
+    parser.add_argument("start_year", type=int, help="The starting year for fetching news.")
+    parser.add_argument("end_year", type=int, help="The ending year for fetching news.")
+    parser.add_argument("step", type=int, help="The number of years to fetch at a time.")
+    # Parse arguments
+    args = parser.parse_args()
+
+    # Call the function with parsed arguments
+    print("Fetching news articles...")
+    get_freq_and_articles_global(isInflation,[i for i in range(args.start_year, args.end_year+1)], args.step)
