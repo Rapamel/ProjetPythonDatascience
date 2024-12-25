@@ -27,39 +27,42 @@ def download_targz(years):
     os.makedirs("ArticlesTarGz", exist_ok=True)
     headers=load_credentials()
     for i in years:
-        print(i, end=" ")
+        print(f"Downloading {i}", end=" ")
         file=f"faro_{i}.tar.gz"
         url=f"https://huggingface.co/datasets/dell-research-harvard/AmericanStories/resolve/main/{file}"
         wb=requests.get(url, headers=headers)
-        print(wb.status_code)
+        print(f"Status code : {wb.status_code}")
         if wb.ok:
             with open("ArticlesTarGz/"+file, "wb") as f:
                 f.write(wb.content)
         else:
             print(f"Error {wb.status_code} downloading {file}")
+    print()
 
 
 def extract_targz(years):
     if not isinstance(years,list):
         years=[years]
     for i in years:
-        print(i, end=" ")
+        print(f"Extracting {i}")
         try :
             with tarfile.open(f"ArticlesTarGz/faro_{i}.tar.gz", "r:gz") as tar:
                 tar.extractall(path=f"ArticlesTarGz/faro_{i}")
         except FileNotFoundError:
             print(f"Error extracting {i} The file is not found")
+    print()
 
 def fold_left_local(fonction, acc, years):
     if not isinstance(years,list):
         years=[years]
     for i in years:
-        print(i, end=" ")
+        print(f"folding {i}", end=" ")
         files=os.listdir(f"ArticlesTarGz/faro_{i}/mnt\\122a7683-fa4b-45dd-9f13-b18cc4f4a187/ca_rule_based_fa_clean/faro_{i}")
         for j in files:
             with open(f"ArticlesTarGz/faro_{i}/mnt\\122a7683-fa4b-45dd-9f13-b18cc4f4a187/ca_rule_based_fa_clean/faro_{i}/{j}") as f:
                 data = json.load(f)
             acc=fonction(data, acc, (data["lccn"]["title"],data['edition']['date'],data['full articles']))
+    print()
     return acc
 
 
@@ -68,7 +71,7 @@ def map_local(fonction,years):
         years=[years]
     acc=[]
     for i in years:
-        print(i, end=" ")
+        print(f"mapping {i}", end=" ")
         files=os.listdir(f"ArticlesTarGz/faro_{i}/mnt\\122a7683-fa4b-45dd-9f13-b18cc4f4a187/ca_rule_based_fa_clean/faro_{i}")
         for j in files:
             with open(f"ArticlesTarGz/faro_{i}/mnt\\122a7683-fa4b-45dd-9f13-b18cc4f4a187/ca_rule_based_fa_clean/faro_{i}/{j}") as f:
@@ -78,6 +81,7 @@ def map_local(fonction,years):
                     acc.append(fonction(data["lccn"]["title"],data['edition']['date'][:-3],data['full articles']))
                 except:
                     acc.append(fonction("No titles found",data['edition']['date'][:-3],data['full articles']))
+    print()
     return acc
 
 
@@ -136,9 +140,35 @@ def get_freq_and_articles_global(isInflation,years,step):
         df.to_parquet(f"ArticlesInflation/{i[0]}-{i[-1]}.parquet")
     return frequences
 
-def isInflation(article):
-    return "inflation" in article.lower()
+def isInflation(article,dico):
+    for i in dico["1-gram"]:
+        if i in article:
+            return True
+    for i in dico["2-gram"]:
+        if i in article:
+            return True
+    for i in dico["3-gram"]:
+        if i in article:
+            return True
+    return False
 
+def creer_dictionnaire_inflation():
+    #Cette fonction renvoie un dictionnaire de n-gram relatifs à l'inflation et aux prix
+
+    return {
+        "1-gram": [
+            "inflation", "disinflation", "inflationary", "deflation", "prices", "cost", "wages", "currency",
+            "money", "devaluation","recession", "stagflation", "economy", "market", "increase", "decrease", "cpi"
+        ],
+        "2-gram": [
+            "price level", "wage growth", "economic downturn", "monetary policy",
+            "cost increase", "cost reduction", "market prices", "inflation rate",
+            "interest rates", "price stability", "consumption basket", "purchasing power"
+        ],
+        "3-gram": [
+            "consumer price index", "rise in prices", "fall in prices",
+            "cost of living", "inflation expectations", "money supply growth",
+            "central bank policy", "economic price adjustments"]}
 
 if __name__ == "__main__":
     # Create the argument parser
@@ -150,7 +180,8 @@ if __name__ == "__main__":
     parser.add_argument("step", type=int, help="The number of years to fetch at a time.")
     # Parse arguments
     args = parser.parse_args()
-
+    isInfl=partial(isInflation,dico=creer_dictionnaire_inflation())
     # Call the function with parsed arguments
     print("Fetching news articles...")
-    get_freq_and_articles_global(isInflation,[i for i in range(args.start_year, args.end_year+1)], args.step)
+    frequences=get_freq_and_articles_global(isInfl,[i for i in range(args.start_year, args.end_year+1)], args.step)
+    frequences.to_parquet("ArticlesInflation/frequences.parquet")
