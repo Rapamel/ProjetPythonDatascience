@@ -4,3 +4,4 @@
 *.env
 *.parquet
 *.zip
+*.csv
