@@ -11,7 +11,7 @@ Le fichier getNews.py sert à récuperer les articles parlant de prêt ou de loi
 Le code va télécharger des fichiers targz à l'aide l'API puis les décompresser, les lire puis les effacer et recommencer jusqu'à avoir fait toutes les années. Je recommande de mettre 3 années à la fois et sur mon pc cela prend quelques heures.
 
 
-Main_Inflation est le notebook principal
+Main_Inflation est le notebook principal il prend un peu moins d'une demi-heure à s'exécuter entièrement sur ma tour (elle est plutôt puissante)
 
 
 Analyse_NLP_frequentielle est le notebook qui sert à calculer les csv de fréquences qui sont upload sur SSP Cloud (le notebook ne les upload pas, tout avait été fait en local et on a upload à la main)
