@@ -7,3 +7,4 @@
 *.csv
 bricolage/*
 results/*
+__pycache__/*
