@@ -1,17 +1,95 @@
-Pour s'assurer d'avoir toutes les bibliotheques il est recommandé d'utiliser "pip install -r requirements.txt" dans la console
+# Media Coverage and Inflation (1919–1963)
 
-Nous avons ajouté le .env au repo GitHub pour des raisons de simplicité et le repo est privé de toute manière mais nous sommes conscients que ce n'est pas une bonne pratique
-Concernant le fichier .env les clés AWS sont les miennes et expire après une semaine donc il peut être nécessaire de contacter raphael.pereira@ensae.fr ou simplement d'utiliser vos propre clés AWS SSP Cloud 
-Tout les fichiers de données sont déjà uploader sur SSP Cloud
+## Project Overview
 
-Le fichier getNews.py sert à récuperer les articles parlant de prêt ou de loin d'inflation il faut le lancer dans la console avec les arguments suivant :
-    - Année de début
-    - Année de fin
-    - Le nombre d'années à télécharger à chaque étape
-Le code va télécharger des fichiers targz à l'aide l'API puis les décompresser, les lire puis les effacer et recommencer jusqu'à avoir fait toutes les années. Je recommande de mettre 3 années à la fois et sur mon pc cela prend quelques heures.
+In recent years, inflation and purchasing power have been central topics in political and media discussions. This project investigates the relationship between **actual inflation rates** and **media coverage of inflation**.
+
+Specifically, we study whether periods of **high inflation coincide with increased media attention** to the topic.
+
+The project is inspired by the research paper from the Banque de France titled *"Using the press to construct a new indicator of inflation perception in France"* (Working Paper No. 921, 2023). While this research focuses on France and recent data, this project applies a similar approach to a **historical context in the United States**.
+
+We analyze the relationship between inflation and press coverage between **1919 and 1963** using a large historical newspaper corpus.
+
+---
+
+## Research Question
+
+**Do periods of high inflation coincide with increased media coverage of inflation?**
+
+---
+
+## Data
+
+Two main data sources are used:
+
+- **Inflation data** from the Federal Reserve Bank of St. Louis (FRED database)
+- **Historical newspapers** from the Library of Congress
+
+The newspaper dataset includes **national and local US newspapers published between 1919 and 1963**, representing **more than 20GB of text data**.
+
+---
+
+## Methodology
+
+The analysis is conducted in several steps:
+
+### 1. Inflation Data Analysis
+
+- Download inflation data from FRED
+- Clean and process the time series
+- Identify periods of high inflation
+
+### 2. Newspaper Corpus Analysis
+
+- Identify articles related to inflation using lexical keywords
+- Process and structure the newspaper data
+- Compute frequencies of inflation-related terms over time
+- Visualize media attention to inflation
+
+### 3. Comparison Between Inflation and Media Coverage
+
+- Aggregate frequency indicators
+- Compare media coverage with inflation dynamics
+
+### 4. Modeling
+
+- Linear regression analysis
+- Sentiment analysis of inflation-related articles
+
+---
+
+## Main Results
+
+Preliminary results suggest a **strong correlation between inflation levels and media coverage**, although the relationship varies across historical periods and economic contexts.
+
+These findings highlight the interaction between **economic reality** and **media representation of economic issues**.
+
+---
 
 
-Main_Inflation est le notebook principal il prend un peu moins d'une demi-heure à s'exécuter entièrement sur ma tour (elle est plutôt puissante)
+
+The main analysis is available in: Main_Inflation.ipynb
 
 
-Analyse_NLP_frequentielle est le notebook qui sert à calculer les csv de fréquences qui sont upload sur SSP Cloud (le notebook ne les upload pas, tout avait été fait en local et on a upload à la main)
+
+
+---
+## How to use
+The two notebooks are used to download the articles and to compute the csv of frequency later used in the main notebook
+
+---
+
+## Technologies Used
+
+- Python
+- Pandas
+- NLP methods for text processing
+- Data visualization libraries
+
+---
+
+## References
+
+- Banque de France Working Paper 921 (2023)  
+- Library of Congress Historical Newspaper Archive  
+- FRED – Federal Reserve Economic Data
